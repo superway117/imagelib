@@ -362,7 +362,10 @@ alloc_large (j_common_ptr cinfo, int pool_id, size_t sizeofobject)
   hdr_ptr = (large_pool_ptr) jpeg_get_large(cinfo, sizeofobject +
 					    SIZEOF(large_pool_hdr));
   if (hdr_ptr == NULL)
+  {
+	int temp = sizeofobject + SIZEOF(large_pool_hdr);
     out_of_memory(cinfo, 4);	/* jpeg_get_large failed */
+  }
   mem->total_space_allocated += sizeofobject + SIZEOF(large_pool_hdr);
 
   /* Success, initialize the new pool header and add to list */

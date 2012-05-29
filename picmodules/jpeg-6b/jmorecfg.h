@@ -10,6 +10,12 @@
  * optimizations.  Most users will not need to touch this file.
  */
 
+#if defined(RED_ARROW)
+#include <portab.h>
+ #endif
+
+#undef JDCT_DEFAULT
+#define JDCT_DEFAULT JDCT_IFAST
 
 /*
  * Define BITS_IN_JSAMPLE as either
@@ -129,6 +135,7 @@ typedef char JOCTET;
  * typedefs live at a different point on the speed/space tradeoff curve.)
  */
 
+#ifndef HAVE_UINT8
 /* UINT8 must hold at least the values 0..255. */
 
 #ifdef HAVE_UNSIGNED_CHAR
@@ -140,7 +147,9 @@ typedef char UINT8;
 typedef short UINT8;
 #endif /* CHAR_IS_UNSIGNED */
 #endif /* HAVE_UNSIGNED_CHAR */
+#endif /* HAVE_UINT8 */
 
+#ifndef HAVE_UINT16
 /* UINT16 must hold at least the values 0..65535. */
 
 #ifdef HAVE_UNSIGNED_SHORT
@@ -148,18 +157,23 @@ typedef unsigned short UINT16;
 #else /* not HAVE_UNSIGNED_SHORT */
 typedef unsigned int UINT16;
 #endif /* HAVE_UNSIGNED_SHORT */
+#endif /* HAVE_UINT16 */
 
+#ifndef HAVE_INT16
 /* INT16 must hold at least the values -32768..32767. */
 
 #ifndef XMD_H			/* X11/xmd.h correctly defines INT16 */
 typedef short INT16;
 #endif
+#endif /* HAVE_INT16 */
 
+#ifndef HAVE_INT32
 /* INT32 must hold at least signed 32-bit values. */
 
 #ifndef XMD_H			/* X11/xmd.h correctly defines INT32 */
 typedef long INT32;
 #endif
+#endif /* HAVE_INT32 */
 
 /* Datatype used for image dimensions.  The JPEG standard only supports
  * images up to 64K*64K due to 16-bit fields in SOF markers.  Therefore
@@ -185,7 +199,14 @@ typedef unsigned int JDIMENSION;
 /* a function used only in its module: */
 #define LOCAL(type)		static type
 /* a function referenced thru EXTERNs: */
+#if defined(RED_ARROW)
+#undef GLOBAL
 #define GLOBAL(type)		type
+#else
+#ifndef GLOBAL
+#define GLOBAL(type)		type
+#endif
+#endif
 /* a reference to a GLOBAL function: */
 #define EXTERN(type)		extern type
 
@@ -201,7 +222,6 @@ typedef unsigned int JDIMENSION;
 #else
 #define JMETHOD(type,methodname,arglist)  type (*methodname) ()
 #endif
-
 
 /* Here is the pseudo-keyword for declaring pointers that must be "far"
  * on 80x86 machines.  Most of the specialized coding for 80x86 is handled
@@ -226,14 +246,15 @@ typedef unsigned int JDIMENSION;
 #ifndef HAVE_BOOLEAN
 typedef int boolean;
 #endif
+
+#ifndef RED_ARROW
 #ifndef FALSE			/* in case these macros already exist */
 #define FALSE	0		/* values of boolean */
 #endif
 #ifndef TRUE
 #define TRUE	1
 #endif
-
-
+#endif
 /*
  * The remaining options affect code selection within the JPEG library,
  * but they don't need to be visible to most applications using the library.
@@ -260,16 +281,16 @@ typedef int boolean;
 
 /* Capability options common to encoder and decoder: */
 
-#define DCT_ISLOW_SUPPORTED	/* slow but accurate integer algorithm */
+#undef DCT_ISLOW_SUPPORTED	/* slow but accurate integer algorithm */
 #define DCT_IFAST_SUPPORTED	/* faster, less accurate integer method */
-#define DCT_FLOAT_SUPPORTED	/* floating-point: accurate, fast on fast HW */
+#undef DCT_FLOAT_SUPPORTED	/* floating-point: accurate, fast on fast HW */
 
 /* Encoder capability options: */
 
 #undef  C_ARITH_CODING_SUPPORTED    /* Arithmetic coding back end? */
-#define C_MULTISCAN_FILES_SUPPORTED /* Multiple-scan JPEG files? */
-#define C_PROGRESSIVE_SUPPORTED	    /* Progressive JPEG? (Requires MULTISCAN)*/
-#define ENTROPY_OPT_SUPPORTED	    /* Optimization of entropy coding parms? */
+#undef C_MULTISCAN_FILES_SUPPORTED /* Multiple-scan JPEG files? */
+#undef C_PROGRESSIVE_SUPPORTED	    /* Progressive JPEG? (Requires MULTISCAN)*/
+#undef ENTROPY_OPT_SUPPORTED	    /* Optimization of entropy coding parms? */
 /* Note: if you selected 12-bit data precision, it is dangerous to turn off
  * ENTROPY_OPT_SUPPORTED.  The standard Huffman tables are only good for 8-bit
  * precision, so jchuff.c normally uses entropy optimization to compute
@@ -278,20 +299,20 @@ typedef int boolean;
  * The exact same statements apply for progressive JPEG: the default tables
  * don't work for progressive mode.  (This may get fixed, however.)
  */
-#define INPUT_SMOOTHING_SUPPORTED   /* Input image smoothing option? */
+#undef INPUT_SMOOTHING_SUPPORTED   /* Input image smoothing option? */
 
 /* Decoder capability options: */
 
 #undef  D_ARITH_CODING_SUPPORTED    /* Arithmetic coding back end? */
-#define D_MULTISCAN_FILES_SUPPORTED /* Multiple-scan JPEG files? */
-#define D_PROGRESSIVE_SUPPORTED	    /* Progressive JPEG? (Requires MULTISCAN)*/
-#define SAVE_MARKERS_SUPPORTED	    /* jpeg_save_markers() needed? */
-#define BLOCK_SMOOTHING_SUPPORTED   /* Block smoothing? (Progressive only) */
-#define IDCT_SCALING_SUPPORTED	    /* Output rescaling via IDCT? */
+#undef D_MULTISCAN_FILES_SUPPORTED /* Multiple-scan JPEG files? */
+#undef D_PROGRESSIVE_SUPPORTED	    /* Progressive JPEG? (Requires MULTISCAN)*/
+#undef SAVE_MARKERS_SUPPORTED	    /* jpeg_save_markers() needed? */
+#undef BLOCK_SMOOTHING_SUPPORTED   /* Block smoothing? (Progressive only) */
+#undef IDCT_SCALING_SUPPORTED	    /* Output rescaling via IDCT? */
 #undef  UPSAMPLE_SCALING_SUPPORTED  /* Output rescaling at upsample stage? */
 #define UPSAMPLE_MERGING_SUPPORTED  /* Fast path for sloppy upsampling? */
-#define QUANT_1PASS_SUPPORTED	    /* 1-pass color quantization? */
-#define QUANT_2PASS_SUPPORTED	    /* 2-pass color quantization? */
+#undef QUANT_1PASS_SUPPORTED	    /* 1-pass color quantization? */
+#undef QUANT_2PASS_SUPPORTED	    /* 2-pass color quantization? */
 
 /* more capability options later, no doubt */
 
